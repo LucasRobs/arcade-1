@@ -1,128 +1,113 @@
-# Agenda 4 - Híbrida com notas e contatos
+# Cofre
+
 ![](figura.jpg)
 
 <!--TOC_BEGIN-->
-- [Requisitos](#requisitos)
-- [Shell](#shell)
-- [Raio X](#raio-x)
+- [Descrição](#descrição)
+- [UML](#uml)
+- [Enum](#enum)
+- [Main](#main)
 
 <!--TOC_END-->
 
-## Requisitos
-Algum dia você já utilizou a agenda do seu telefone para guardar outra coisa além de contatos e telefones? Eu mesmo já utilizei a minha para guardar algumas notas e até números ou senhas. O objetivo da agenda híbrida é fazer uma agenda capaz de guardar e favoritar várias coisas além de contatos.
+## Descrição
+O sistema deverá:
 
-Você vai partir do projeto da agenda de contatos e seguir a seguinte sequência de implementações do projeto.
+- Gerenciar um cofrinho do tipo Porquinho capaz de guardar moedas e itens.
+- As moedas devem ser criadas através de uma `enum`.
+-  tem uma descrição.
+- Ambos moedas e itens tem um atributo volume.
+- O volume do cofre incrementa conforme ele recebe itens e moedas.
+- A lógica da utilização do cofre é:
+    - Para inserir moedas e itens o cofre deve estar inteiro.
+    - Para obter moedas e itens o cofre deve estar quebrado.
+    - Ao obter moedas e itens, os atribuitos `valor` e `itens` do porco devem ser zerados.
 
-- Utilize o nome do contato e o título da nota como chave única da entrada.
-- Tanto na apresentação da agenda como da lista de favoritos, a lista deve ser apresentada ordenada pela chave.
-- Na formação toString da entrada utilize:
-    - `-` para marcar as entradas normais e `@` para as entradas favoritadas.
-    - `C` para marcar os contatos e `N` para marcar as notas.
-
-## Shell
-```bash
-#__case init contatos
-# adicionava o contato e vários telefones ao contato
-# se o contato ja existir, apenas adicione os novos telefones
-$addContato eva oi:8585 claro:9999
-$addContato ana tim:3434 casa:4567 oi:8754
-$addContato xuxa claro:99
-$agenda
-- C ana [0:tim:3434][1:casa:4567][2:oi:8754]
-- C eva [0:oi:8585][1:claro:9999]
-- C xuxa [0:claro:99]
-
-#__case fav contatos
-$fav eva
-$fav ana
-@ C ana [0:tim:3434][1:casa:4567][2:oi:8754]
-@ C eva [0:oi:8585][1:claro:9999]
-- C xuxa [0:claro:99]
-
-#__case lista favoritos
-$favorited
-@ C ana [0:casa:4567][1:oi:8754]
-@ C eva [0:oi:8585][1:claro:9999]
-
-#__case add notes
-$addNote mercantil ovo chiclete fandangos
-$addNote mercantil pao
-$agenda
-@ C ana [0:tim:3434][1:casa:4567][2:oi:8754]
-@ C eva [0:oi:8585][1:claro:9999]
-- N mercantil (ovo chiclete fandangos pao)
-- C xuxa [0:claro:99]
-
-#__case fav notes
-$fav mercantil
-$favorited
-@ C ana [0:tim:3434][1:casa:4567][2:oi:8754]
-@ C eva [0:oi:8585][1:claro:9999]
-@ N mercantil (ovo chiclete fandangos pao)
-
-$agenda
-@ C ana [0:tim:3434][1:casa:4567][2:oi:8754]
-@ C eva [0:oi:8585][1:claro:9999]
-@ N mercantil (ovo chiclete fandangos pao)
-- C xuxa [0:claro:99]
-
-$end
-```
-
-## Raio X
+## UML
 
 ```java
+enum Moeda
+M10(0.10, 1)
+M25(0.25, 3)
+M50(0.50, 2)
+M100(1.00, 4)
+--
++ valor: double
++ volume: int
+--
+Moeda(valor, volume)
 
-abstract class Entry{
-    id: string
-    favorited: bool
+class Item
++ descricao: String
++ volume: int
+--
+Item(descricao, volume)
 
-    setId(value: string, type: Type): void
-    getId(): string
-    isFavorited(): bool
-    setFavorited(value:bool): void
-    toString(): string
+class Porco
++ itens: String
++ valor: double
++ volume: int
++ volumeMax: int
++ estaQuebrado: boolean
+--
++ addMoeda(moeda: Moeda): boolean
++ addItem(item: Item): boolean
++ quebrar(): bool
++ pegarMoedas(): float
++ pegarItens(): String
+```
+
+## Enum
+
+Você pode criar as Moedas utilizando a enum do Java:
+```java
+enum Moeda {
+    M10(0.10, 1),
+    M25(0.25, 2),
+    M50(0.50, 3),
+    M100(1.00, 4);
+
+    double valor;
+    int volume;
+
+    Moeda(double valor, int volume) {
+        this.valor = valor;
+        this.volume = volume;
+    }
+
+    public String toString() {
+        return "Valor: " + valor + " Volume: " + valor;
+    }
 }
+```
 
-class Agenda{
-    - entries: Entry[]
-    - favorites: Entry[]
-    ***
-    addEntry(Entry entry)
-    rmEntry(id: String)  //desfavorita se preciso e remove a entrada
-    getEntries(): Entry[] //retorna todas as entradas
-    getFavorites(): Entry[] //retorna todos os favoritos
-    setFavorited(idEntry: string, value: bool)
-    filter(pattern: string)
+## Main
+
+```java
+public class Solver{
+    public static void main(String[] args) {
+        Porco porco = new Porco(20);
+        System.out.println(porco); //I:() M:0 V:0/20 EQ:false
+        porco.addMoeda(Moeda.M10);
+        porco.addMoeda(Moeda.M50);
+        System.out.println(porco); //I:() M:0.6 V:4/20 EQ:false
+
+        porco.addItem(new Item("ouro", 3));
+        System.out.println(porco); //I:(ouro) M:0.6 V:7/20 EQ:false
+
+        porco.addItem(new Item("passaporte", 2));
+        System.out.println(porco); //I:(ouro, passaporte) M:0.6 V:9/20 EQ:false
+
+        porco.pegarItens();  //Voce deve quebrar o cofre primeiro
+        porco.pegarMoedas(); //Voce deve quebrar o cofre primeiro
+        System.out.println(porco); //I:(ouro, passaporte) M:0.6 V:9/20 EQ:false
+
+        porco.quebrar();
+        porco.quebrar(); //O cofre ja esta quebrado
+
+        System.out.println(porco.pegarItens());  //ouro, passaporte
+        System.out.println(porco.pegarMoedas()); //0.6
+        System.out.println(porco); //I:() M:0.0 V:9/20 EQ:true
+    }
 }
-
-//opcao 1
-class MasterAgenda extends Agenda{
-    getContatos(): Contato[]
-    getNotes(): Note[]
-    getContato(string id): Contato
-    getNote(string id): Note
-}
-
-class Fone{
-    id: string
-    number: string
-}
-
-class Contato extends Entry{
-    fones: Fone[]
-    addFone(fone: Fone)
-    rmFone(id)
-}
-
-class Note extends Entry {
-    text: string
-    itens: string[]
-    addItem(string item)
-}
-
-class Controller {
-    master: MasterAgenda
-}
-
 ```

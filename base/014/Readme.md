@@ -1,10 +1,10 @@
-# Agenda 1 - Um único contato
+# Contato - Agenda 1
 ![](figura.png)
 
 <!--TOC_BEGIN-->
 - [Requisitos](#requisitos)
 - [Shell](#shell)
-- [Raio X](#raio-x)
+- [Diagrama UML](#diagrama-uml)
 - [Ajuda](#ajuda)
 
 <!--TOC_END-->
@@ -26,7 +26,7 @@ Seu programa deve:
     - Adapte o print para apresentar os índices.
 ```sh
 # Exemplo de saída
-- ana [0:tim:3434][1:casa:4567][2:oi:8754]
+- ana [0:tim:3434] [1:casa:4567] [2:oi:8754] [3:casa:4567] [4:oi:8754]
 ```
 
 - **Remover telefones do contato.**    
@@ -72,30 +72,9 @@ $end
 ```
 
 ***
-## Raio X
+## Diagrama UML
+![](diagrama.png)
 
-```java
-class Fone
-+ id: string
-+ number: string
---
-+ _validate(number):_ bool
-+ toString(): string
---
-Fone(id, number)
-
-class Contato
-- name: string
-- fones: Fone[]
---
-+ addFone(fone: Fone) : boolean
-+ rmFone(ind: int) : boolean
-+ toString()
---
-Contato(name)
-getName(): string
-getFones(): Fone[]
-````
 
 ## Ajuda
 - Utilize uma estrutura linear como vector(c++) ou ArrayList(Java) para guardar os telefones.

@@ -1,13 +1,14 @@
-# Agenda 2 - Varios contatos ordenados
-![](figura.jpg)
+# Busca - Agenda 2
 
 <!--TOC_BEGIN-->
 - [Requisitos Novos](#requisitos-novos)
 - [Shell](#shell)
-- [Raio X](#raio-x)
+- [Diagrama](#diagrama)
 - [Ajuda](#ajuda)
+- [Main não interativa](#main-não-interativa)
 
 <!--TOC_END-->
+![](figura.jpg)
 
 Sua agenda possui vários contatos e cada contato possui vários telefones.
 ***
@@ -26,7 +27,7 @@ Sua agenda possui vários contatos e cada contato possui vários telefones.
 
 ## Shell
 
-```bash
+```python
 #__case adicionando em lote
 $add eva oio:8585 cla:9999
 $add ana tim:3434 
@@ -36,7 +37,7 @@ $add bia viv:5454
 # adicione os telefones ao contato existente
 $add ana cas:4567 oio:8754
 
-$agenda
+$show
 - ana [0:tim:3434] [1:cas:4567] [2:oio:8754]
 - bia [0:viv:5454]
 - eva [0:oio:8585] [1:cla:9999]
@@ -46,15 +47,15 @@ $agenda
 # remove o elemento indice 0 da ana
 $rmFone ana 0
 
-$agenda
+$show
 - ana [0:cas:4567] [1:oio:8754]
 - bia [0:viv:5454]
 - eva [0:oio:8585] [1:cla:9999]
 
 #__case removendo contato
-$rmContato bia
+$rm bia
 
-$agenda
+$show
 - ana [0:cas:4567] [1:oio:8754]
 - eva [0:oio:8585] [1:cla:9999]
 
@@ -62,7 +63,7 @@ $add ava tim:5454
 $add rui viv:2222 oio:9991
 $add zac rec:3131
 
-$agenda
+$show
 - ana [0:cas:4567] [1:oio:8754]
 - ava [0:tim:5454]
 - eva [0:oio:8585] [1:cla:9999]
@@ -82,53 +83,109 @@ $end
 
 #__end__
 ```
+***
+## Diagrama
+![](diagrama.png)
 
-## Raio X
-```java
-class Fone
---
-+ id: string
-+ number: string
---
-+ _validate(number):_ bool
-+ toString(): string
---
-Fone(serial)             <------ NOVO
-Fone(id, number)
-
-class Contato
---
-- name: string
-- fones: Fone[]
---
-+ addFone(id: string, number: string) : boolean
-+ rmFone(index: int) : boolean
-+ toString()
---
-Contato(name)
-getName(): string
-getFones(): Fone[]
-
-
-class Agenda
---
-- contatos: Contato[]
---
-- findContato(name: string): int
-
-+ addContato(name: string, fones: Fone[])
-+ rmContato(name: string): bool
-+ getContato(name: string): Contato
-+ search(pattern: string): Contato[]
-+ getContatos(): Contato[]
-````
-
-
-
+***
 ## Ajuda
-- Inserção
-    - Opção 1: Guarde os contato em uma estrutura de dados ordenada como um map(c++) ou TreeMap(Java) utilizando o Id do contato como chave.
-    - Opção 2: Utilizar uma estrutura linear, tal como um vector(c++) ou ArrayList(Java), mas lembrar de reordenar o vetor para cada nova inserção de contato.
-- Busca: 
-    - Na busca por pattern verifique faça uma busca usando a substring com o valor toString() to contato.
+- Você pode criar mais métodos auxiliares para lhe ajudar.
 - Crie um construtor para o Fone que aceite um único parâmetro, no caso o serial "oi:13123"
+- Para receber vários telefones por linha você pode fazer um laço pegando a partir do índice 2.
+- O construtor que recebe um serial pode ser utilizado para instanciar um Fone
+```java
+if(ui[0].equals("add")){ //add julia tim:99 oi:123 vivo:123544
+    for(int i = 2; i < ui.length; i++)
+        agenda.add(ui[1], new Fone(ui[i]));
+}
+```
+
+- A sua função add deve criar um contato novo se o contato não existir e então adicionar o telefone
+```java
+void add(String name, Fone fone){
+    Contact contact = this.getContact(name);
+    if(contact == null){ //cria e adiciona o contato se ele nao existir
+        contact = new Contact(name);
+        this.contacts.add(contact);
+    }
+    contact.addFone(fone);  //aproveita para adicionar o telefone
+    //ordene ser vetor
+}
+```
+
+- Para fazer a busca por padrão você pode criar uma lista auxiliar de contatos.
+- Na busca por pattern verifique faça uma busca usando a substring com o valor toString() to contato.
+
+```java
+ArrayList<Contact> search(String pattern){
+    ArrayList<Contact> result = new ArrayList<>();
+    for(Contact contact : this.contacts){
+        if ... //se esse contato bater com o padrão
+            result.add(contact);
+    }
+    return result;
+}
+```
+
+
+
+***
+## Main não interativa
+```java
+//case adicionando em lote
+Agenda agenda = new Agenda();
+agenda.addContact("eva", Arrays.asList(new Fone("oio", 8585), new Fone("cla", 9999)));
+agenda.addContact("ana", Arrays.asList(new Fone("Tim", 3434)));
+agenda.addContact("bia", Arrays.asList(new Fone("viv", 5454)));
+agenda.addContact("ana", Arrays.asList(new Fone("cas", 4567), new Fone("oio", 8754)));
+System.out.println(agenda);
+/*
+- ana [0:tim:3434] [1:cas:4567] [2:oio:8754]
+- bia [0:viv:5454]
+- eva [0:oio:8585] [1:cla:9999]
+*/
+
+//case removendo telefone
+agenda.rmFone("ana", 0);
+System.out.println(agenda);
+/*
+- ana [0:cas:4567] [1:oio:8754]
+- bia [0:viv:5454]
+- eva [0:oio:8585] [1:cla:9999]
+*/
+
+//case removendo contato
+agenda.rmContact("bia");
+System.out.println(agenda);
+/*
+- ana [0:cas:4567] [1:oio:8754]
+- eva [0:oio:8585] [1:cla:9999]
+*/
+agenda.addContact("ava", Arrays.asList(new Fone("viv", 5454)));
+agenda.addContact("rui", Arrays.asList(new Fone("viv", 2222),new Fone("oio", 9991)));
+agenda.addContact("zac", Arrays.asList(new Fone("rec", 3131)));
+System.out.println(agenda);
+/*
+- ana [0:cas:4567] [1:oio:8754]
+- ava [0:tim:5454]
+- eva [0:oio:8585] [1:cla:9999]
+- rui [0:viv:2222] [1:oio:9991]
+- zac [0:rec:3131]
+*/
+
+//case busca por padrao
+for(Contato contato : agenda.search("va")){
+    System.out.println(contato);
+}
+/*
+- ava [0:tim:5454]
+- eva [0:oio:8585] [1:cla:9999]
+*/
+for(Contato contato : agenda.search("999")){
+    System.out.println(contato);
+}
+/*
+- eva [0:oio:8585] [1:cla:9999]
+- rui [0:viv:2222] [1:oio:9991]
+*/
+```

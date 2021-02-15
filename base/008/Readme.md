@@ -1,16 +1,18 @@
-# Agiota Gente Fina
-
-Ptolomeu é o agiota mais carismático de MoneyVille. Sem nenhuma razão foi denunciado e acabou indo pra cadeira. A lasqueira foi que ele afirma que quem implementou o software de controle dos empréstimos e quem apagou os registro dos defuntos foi você.
-
-![](figura.jpg)
+# Agiota
 
 <!--TOC_BEGIN-->
 - [Requisitos](#requisitos)
-- [Exemplos](#exemplos)
+- [Shell](#shell)
 - [Diagrama](#diagrama)
+- [Main](#main)
 - [Fim da história](#fim-da-história)
 
 <!--TOC_END-->
+![](figura.jpg)
+
+Ptolomeu é o agiota mais carismático de MoneyVille. Sem nenhuma razão foi denunciado e acabou indo pra cadeira. A lasqueira foi que ele afirma que quem implementou o software de controle dos empréstimos e quem apagou os registro dos defuntos foi você.
+
+
 
 Seu Plutolomeu é um agiota que empresta dinheiro a juros 0. Ele é uma pessoa muito carismática e amiga de todos. De sorriso largo sempre aberto, Plutolomeu é amigo da vizinhança. Inclusive esse ano, ele ganhou uma festa de aniversário surpresa de todos os seus devedores. Só quem é gente muito fina ganha festa surpresa né?
 
@@ -18,14 +20,16 @@ Seu Plutolomeu é um agiota que empresta dinheiro a juros 0. Ele é uma pessoa m
 
 Vamos abstrair um pouco da história de Plutolomeu e analisar o sistema de emprestimos que ele tinha instalado em seu computador.
 
+***
 ## Requisitos
 
 - Iniciar Sistema.
     - Inicia o sistema com uma certa quantidade de dinheiro.
 
-
 - Cadastrar Clientes
-    - Cada cliente tem um apelido (clienteId) que é sua chave no sistema e um nome que pode ter várias palavras.
+    - Cada cliente tem
+        - um codenome (clienteId) que é sua chave no sistema
+        - um limite que define o máximo de dinheiro que ela pode ficar devendo ao agiota.
 
 - Emprestar Dinheiro.
     - Empréstimos são salvos com valor positivo de transação.
@@ -47,66 +51,85 @@ Vamos abstrair um pouco da história de Plutolomeu e analisar o sistema de empre
     - Apagar as transações não altera o saldo de ptolomeu.
 
 
-
-
-## Exemplos
+***
+## Shell
 
 ```bash
 #__case init
 $init 500
 
 #__case cadastrar
-$addCli maria maria silva
-$addCli josue josue matos
-$addCli maria ana maria silva
+$addCli maria 500
+$addCli josue 60
+$addCli maria 300
 fail: cliente ja existe
 
 #__case emprestar
-$emprestar maria 300
-$emprestar josue 50
-$emprestar maria 100
-$emprestar bruno 30
+$lend maria 300
+$lend josue 50
+$lend maria 100
+
+#__case show
+# Mostra os cliente ordenados por codenome
+# Mostra as operações pela ordem que elas ocorreram
+$show
+clients:
+- josue:50/60
+- maria:400/500
+transactions:
+- id:0 maria:300
+- id:1 josue:50
+- id:2 maria:100
+balance: 50
+
+# __case erros no emprestimo
+$lend bruno 30
 fail: cliente nao existe
-$emprestar josue 400
+
+$lend maria 60
 fail: fundos insuficientes
 
-#__case resumo
-# Mostrar todos ordenados por codenome
-$resumo
-josue : josue matos : 50
-maria : maria silva : 400
-saldo : 50
+$lend josue 30
+fail: limite excedido
 
-#__case historico
-$historico
-id:0 [maria 300]
-id:1 [josue 50]
-id:2 [maria 100]
+$show
+clients:
+- josue:50/60
+- maria:400/500
+transactions:
+- id:0 maria:300
+- id:1 josue:50
+- id:2 maria:100
+balance: 50
 
 #__case receber dinheiro
-$receber maria 1000
+$receive maria 1000
 fail: valor maior que a divida
-$receber maria 350
-$historico
-id:0 [maria 300]
-id:1 [josue 50]
-id:2 [maria 100]
-id:3 [maria -350]
-$receber josue 1
-$receber maria 10
+$receive maria 350
+$receive josue 1
+$receive maria 10
+$show
+clients:
+- josue:49/60
+- maria:40/500
+transactions:
+- id:0 maria:300
+- id:1 josue:50
+- id:2 maria:100
+- id:3 maria:-350
+- id:4 josue:-1
+- id:5 maria:-10
+balance: 411
 
 #__case matar
-$matar josue
-
-$historico
-id:0 [maria 300]
-id:2 [maria 100]
-id:3 [maria -350]
-id:5 [maria -10]
-
-$resumo
-maria : maria silva : 40
-saldo : 411
+$kill maria
+$show
+clients:
+- josue:49/60
+transactions:
+- id:1 josue:50
+- id:4 josue:-1
+balance: 411
 
 $end
 ```
@@ -115,6 +138,41 @@ $end
 ## Diagrama
 ![](diagrama.png)
 
+***
+## Main
+```java
+    Agiota ag = new Agiota(500);
+    ag.addCli("maria", 500);
+    ag.addCli("josue", 60);
+    ag.addCli("maria", 300); //fail
+
+    ag.lend("maria", 300);
+    ag.lend("josue", 50);
+    ag.lend("maria", 100);
+
+    System.out.println(ag); //check
+
+    ag.lend("bruno", 30);//fail
+    ag.lend("maria", 60);//fail
+    ag.lend("josue", 30);//fail
+
+    System.out.println(ag); //check
+
+    ag.receive("maria", 1000);//fail
+    ag.receive("maria", 350);
+    ag.receive("josue", 1);
+    ag.receive("maria", 10);
+
+    System.out.println(ag); //check
+
+    ag.kill("maria");
+
+    System.out.println(ag); //check
+}
+
+```
+
+***
 ## Fim da história
 
 - Então assim ficou Ptolomeu, depois de conseguir explicar pra polícia que tudo não passou me um mal entendido. 

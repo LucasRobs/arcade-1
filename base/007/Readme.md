@@ -1,14 +1,15 @@
-# Agência 1 - Extrato, Saldo, Tarifas
-![](figura.jpg)
+# Tarifas - Agência 1
 
 <!--TOC_BEGIN-->
 - [Requisitos](#requisitos)
 - [Shell](#shell)
-- [Main em Java](#main-em-java)
 - [Diagrama UML](#diagrama-uml)
+- [Main em Java](#main-em-java)
+- [Dicas](#dicas)
 - [Recursos Extras](#recursos-extras)
 
 <!--TOC_END-->
+![](figura.jpg)
 
 O objetivo dessa atividade é implementar uma classe responsável por gerenciar a conta bancária de um único cliente. Faremos operações de saque, depósito e extrato.
 
@@ -42,7 +43,7 @@ $init 100
 $show 
 conta:100 saldo:0
 
-#__case 
+#__case depositar
 $deposito 100
 $deposito -10
 fail: valor invalido
@@ -107,53 +108,38 @@ $extratoN 2
 
 $end
 ```
+
+***
+## Diagrama UML
+![](diagrama.png)
+
+***
 ## Main em Java
 ```java
-import java.util.*;
+public static void main(String[] args) {
+    Conta conta = new Conta(100);
+    System.out.println(conta);
+// conta:100 saldo:0
+    conta.depositar(100);
+    conta.depositar(-10);
+// fail: valor invalido
 
-interface Conta{
-    void depositar(float value);
-    void saque(float valor);
-    void tarifa(float valor);
-    void extrato();
-    void extratoN(int valor);
-    void extornar(int valor)
-}
-public class Solver {
-    public static void main(String[] args) {
-        Conta sys = new Conta(100);
-        System.out.println(sys);
-/*
-    conta:100 saldo:0
-*/
-        sys.depositar(100);
-        sys.depositar(-10);
-/*
-    fail: valor invalido
-*/
-        System.out.println(sys);
-/*
-    conta:100 saldo:100
-*/
-        sys.saque(20);
-        sys.tarifa(10);
-        System.out.println(sys);
-/*
-    conta:100 saldo:70
-*/
-        sys.saque(150);
-/*
-    fail: saldo insuficiente
-*/
-        sys.saque(30);
-        sys.tarifa(5);
-        sys.depositar(5);
-        sys.tarifa(1);
-        System.out.println(sys);
-/*
-    conta:100 saldo:39
-*/
-        sys.extrato();
+    System.out.println(conta);
+// conta:100 saldo:100
+    conta.saque(20);
+    conta.tarifa(10);
+    System.out.println(conta);
+// conta:100 saldo:70
+    conta.saque(150);
+// fail: saldo insuficiente
+    conta.saque(30);
+    conta.tarifa(5);
+    conta.depositar(5);
+    conta.tarifa(1);
+    System.out.println(conta);
+// conta:100 saldo:39
+    for(Operacao op : conta.extrato())
+        System.out.println(op);
 /*
 0: abertura:    0:    0
 1: deposito:  100:  100
@@ -164,18 +150,20 @@ public class Solver {
 6: deposito:    5:   40
 7:   tarifa:   -1:   39
 */
-        sys.extratoN(2);
+    for(Operacao op : conta.extratoN(2))
+            System.out.println(op);
 /*
 6: deposito:    5:   40
 7:   tarifa:   -1:   39
 */
-        for(int id : Arrays.asList(1, 5, 7, 50))
-            sys.extornar(id);
+    for(int id : Arrays.asList(1, 5, 7, 50))
+        conta.extornar(id);
 /*
 fail: indice 1 nao e tarifa
 fail: indice 50 invalido
 */
-        sys.extrato();
+    for(Operacao op : conta.extrato())
+        System.out.println(op);
 /*
 0: abertura:    0:    0
 1: deposito:  100:  100
@@ -188,21 +176,58 @@ fail: indice 50 invalido
 8:  extorno:    5:   44
 9:  extorno:    1:   45
 */
-        sys.tarifa(5);
-        sys.extratoN(2);
+    conta.tarifa(5);
+    conta.extratoN(2);
 /*
 9:  extorno:    1:   45
 10:   tarifa:  -50:   -5
 */
+}
+
+```
+
+***
+
+## Dicas
+- Nas operações de saque, depósito, tarifa, você precisa criar uma operação e adicionar no extrato para registrar essa operação. Cada operação deve ter um id único e incremental. O atributo nextId da classe conta deve ser utilizado para numerar as operações. 
+- O método `adicionarOperacao(descricao, valor)` serve para fazer isso.
+```java
+void adicionarOperacao(descricao, valor)
+    cria a operacao(nextId, descricao, valor, getSaldo)
+    incrementa o nextId
+    adiciona a operacoa criada no extrato
+```
+- Então, no saque, depósito, basta você invocar o método `adicionarOperacao`
+```java
+void saque(float valor)
+    ...
+    this.saldo -= valor;
+    adicionarOperacao("saque", -valor);
+    ...
+}
+```
+- Para processar várias tarifas em linha, utilize um `for` na main.
+
+```java
+class Conta{
+    void extornar(int indice){
+        //a lógica de extorna UMA tarifa
+        ...
     }
+}
+
+main(){
+    ...
+    String[] ui = line.split(" ")
+    ...
+    if(ui[0].equals("extornar"){ //extornar 1 4 7 21
+        for(int i = 1; i < ui.lenght; i++)
+            conta.extornar(Integer.parseInt(ui[i]));
+    ...
 }
 ```
 
-## Diagrama UML
-![](resources/diagrama.png)
 
 ***
 ## Recursos Extras
 - [Comandos de teste](resources/testes.tio)
-- [Modelo em C++](resources/raiox.cpp)
-- [Exemplo Main em C++](resources/exemplo_main.cpp)

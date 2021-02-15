@@ -1,15 +1,16 @@
 # Topic de Luxo
-![](figura.jpg)
-
+[](solver.cpp)
 <!--TOC_BEGIN-->
 - [Requisitos](#requisitos)
 - [Shell](#shell)
-- [Raio X](#raio-x)
+- [Diagrama](#diagrama)
 
 <!--TOC_END-->
+![](figura.jpg)
 
 O objetivo dessa atividade é exercitar o que vocês aprenderam no cinema com algumas variações. Aqui, vamos implementar um sistema de alocação de passageiros em uma topic. Nossa topic tem uma quantidade máxima de passageiros, mas também define alguns assentos preferenciais.
 
+***
 ## Requisitos
 Seu sistema deverá:
 
@@ -22,7 +23,7 @@ Seu sistema deverá:
     - Inserir passageiros informando id e idade
         - Se o passageiro for idoso:
             - Se houver cadeiras preferenciais
-                - O coloque na primeira cadeira preferencia.
+                - O coloque na primeira cadeira preferência.
             - Senão
                 - O coloque na primeira cadeira normal.
         - Se o passageiro não for idoso.
@@ -91,22 +92,9 @@ fail: pass ja esta na topic
 $show
 [ @joao:103 @bia:16 =aragao:96 = =rex:20 ]
 $end
-
 #__end__
 ```
 
 ***
-## Raio X
-```java
-class Pass
-+ id: string
-+ idade: int
-
-class Topic
-+ cadeiras: Pass[]
---
-+ 
-
-
-
-```
+## Diagrama
+![](diagrama.png)
